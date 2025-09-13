@@ -2,15 +2,10 @@
 version = "20"
 
 [phases.install]
-cmds = ["npm ci --include=dev"]
+cmds = ["cd backend && npm ci --include=dev"]
 
 [phases.build]
-cmds = [
-  "cd backend && npm install",
-  "cd backend && npm run build",
-  "cd frontend && npm install",
-  "cd frontend && npm run build"
-]
+cmds = ["cd backend && npm run build"]
 
 [start]
-cmd = "npm run start"
+cmd = "cd backend && npm run start:prod"

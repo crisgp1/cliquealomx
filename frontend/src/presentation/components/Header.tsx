@@ -53,7 +53,7 @@ export function Header() {
               style={{ cursor: 'pointer' }}
             >
               <Image
-                src="/logo.svg"
+                src="/logo.webp"
                 alt="Cliquéalo.mx"
                 width={120}
                 height={40}

@@ -84,7 +84,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
           <Group justify="space-between" style={{ flex: 1 }}>
             <Group>
               <Image
-                src="/logo.svg"
+                src="/logo.webp"
                 alt="Cliquéalo.mx"
                 width={120}
                 height={40}

@@ -43,7 +43,7 @@ export function Footer() {
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Stack gap="md">
               <Image
-                src="/logo-blanco.svg"
+                src="/logo-blanco.webp"
                 alt="Cliquéalo.mx"
                 width={150}
                 height={35}

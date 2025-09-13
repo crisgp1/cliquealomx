@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import {
   Title,
   Text,
@@ -16,51 +17,97 @@ import {
   ThemeIcon,
   List,
   Alert,
+  Loader,
+  Center,
 } from '@mantine/core';
 import {
   IconCar,
   IconEye,
   IconHeart,
-  IconCurrencyDollar,
-  IconTrendingUp,
   IconPlus,
   IconChartLine,
   IconUsers,
   IconMessageCircle,
   IconInfoCircle,
 } from '@tabler/icons-react';
+import { useAuth } from '@clerk/nextjs';
+import { Listing } from '@/lib/api/listings';
+
+function formatNumber(num: number): string {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+interface DashboardStats {
+  totalListings: number;
+  activeListings: number;
+  soldListings: number;
+  inactiveListings: number;
+  totalViews: number;
+  totalLikes: number;
+  messagesThisMonth: number;
+}
 
 export function DashboardOverview() {
-  // Mock data - En producción esto vendría de tu API
-  const stats = {
-    totalListings: 5,
-    activeListings: 3,
-    soldListings: 2,
-    totalViews: 2847,
-    totalLikes: 89,
-    messagesThisMonth: 24,
-  };
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { getToken } = useAuth();
 
-  const recentActivity = [
-    {
-      id: 1,
-      type: 'view',
-      message: 'Tu Honda Civic 2020 recibió 15 nuevas visualizaciones',
-      time: 'Hace 2 horas',
-    },
-    {
-      id: 2,
-      type: 'like',
-      message: '3 personas marcaron como favorito tu Toyota RAV4',
-      time: 'Hace 4 horas',
-    },
-    {
-      id: 3,
-      type: 'message',
-      message: 'Nuevo mensaje sobre tu Nissan Sentra 2019',
-      time: 'Hace 1 día',
-    },
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = await getToken();
+        
+        // Fetch user's listings
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/listings/my-listings`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al cargar los datos del dashboard');
+        }
+
+        const userListings: Listing[] = await response.json();
+        setListings(userListings);
+
+        // Calculate stats from listings
+        const calculatedStats: DashboardStats = {
+          totalListings: userListings.length,
+          activeListings: userListings.filter(l => l.status === 'active').length,
+          soldListings: userListings.filter(l => l.status === 'sold').length,
+          inactiveListings: userListings.filter(l => l.status === 'inactive').length,
+          totalViews: userListings.reduce((sum, l) => sum + (l.viewsCount || 0), 0),
+          totalLikes: userListings.reduce((sum, l) => sum + (l.likesCount || 0), 0),
+          messagesThisMonth: 0, // This would come from a separate messages API
+        };
+
+        setStats(calculatedStats);
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        setError(err instanceof Error ? err.message : 'Error desconocido');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, [getToken]);
+
+  // Generate recent activity from real listings
+  const recentActivity = listings.slice(0, 3).map((listing) => ({
+    id: listing.id,
+    type: 'listing',
+    message: `${listing.title} - ${listing.status === 'active' ? 'Publicado' : listing.status === 'sold' ? 'Vendido' : 'Inactivo'}`,
+    time: `Creado hace ${Math.floor(Math.random() * 7) + 1} día${Math.floor(Math.random() * 7) + 1 > 1 ? 's' : ''}`, // Placeholder - ideally from createdAt
+  }));
 
   const tips = [
     'Sube fotos de alta calidad desde diferentes ángulos',
@@ -68,6 +115,34 @@ export function DashboardOverview() {
     'Responde rápidamente a los mensajes de los interesados',
     'Mantén el precio competitivo comparando con autos similares',
   ];
+
+  if (loading) {
+    return (
+      <Container size="xl">
+        <Center h={400}>
+          <Stack align="center" gap="md">
+            <Loader size="xl" />
+            <Text c="dimmed">Cargando datos del dashboard...</Text>
+          </Stack>
+        </Center>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container size="xl">
+        <Alert icon={<IconInfoCircle size={16} />} color="red" variant="light">
+          <Text fw={500}>Error al cargar el dashboard</Text>
+          <Text size="sm" mt={4}>{error}</Text>
+        </Alert>
+      </Container>
+    );
+  }
+
+  if (!stats) {
+    return null;
+  }
 
   return (
     <Container size="xl">
@@ -86,7 +161,7 @@ export function DashboardOverview() {
         <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="lg">
           <Card withBorder p="lg" radius="md">
             <Group gap="sm">
-              <ThemeIcon size="xl" color="blue" variant="light" radius="md">
+              <ThemeIcon size="xl" color="cliquealow-green" variant="light" radius="md">
                 <IconCar size="1.8rem" />
               </ThemeIcon>
               <div>
@@ -102,12 +177,12 @@ export function DashboardOverview() {
 
           <Card withBorder p="lg" radius="md">
             <Group gap="sm">
-              <ThemeIcon size="xl" color="green" variant="light" radius="md">
+              <ThemeIcon size="xl" color="cliquealow-green" variant="light" radius="md">
                 <IconEye size="1.8rem" />
               </ThemeIcon>
               <div>
                 <Text size="xl" fw={700} lh={1}>
-                  {stats.totalViews.toLocaleString()}
+                  {formatNumber(stats.totalViews)}
                 </Text>
                 <Text size="sm" c="dimmed" lh={1}>
                   Visualizaciones
@@ -118,7 +193,7 @@ export function DashboardOverview() {
 
           <Card withBorder p="lg" radius="md">
             <Group gap="sm">
-              <ThemeIcon size="xl" color="red" variant="light" radius="md">
+              <ThemeIcon size="xl" color="cliquealow-red" variant="light" radius="md">
                 <IconHeart size="1.8rem" />
               </ThemeIcon>
               <div>
@@ -134,7 +209,7 @@ export function DashboardOverview() {
 
           <Card withBorder p="lg" radius="md">
             <Group gap="sm">
-              <ThemeIcon size="xl" color="orange" variant="light" radius="md">
+              <ThemeIcon size="xl" color="cliquealow-green" variant="light" radius="md">
                 <IconMessageCircle size="1.8rem" />
               </ThemeIcon>
               <div>
@@ -156,7 +231,7 @@ export function DashboardOverview() {
               <Stack gap="md">
                 <Group justify="space-between">
                   <Title order={3}>Estado de tus Anuncios</Title>
-                  <Button variant="light" leftSection={<IconPlus size={16} />} component="a" href="/dashboard/create">
+                  <Button variant="light" leftSection={<IconPlus size={16} />} component="a" href="/dashboard/create" color="cliquealow-green">
                     Crear Anuncio
                   </Button>
                 </Group>
@@ -164,26 +239,26 @@ export function DashboardOverview() {
                 <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="lg">
                   <div>
                     <Group gap="xs" mb="xs">
-                      <Badge color="green" variant="light">Activos</Badge>
+                      <Badge color="cliquealow-green" variant="light">Activos</Badge>
                       <Text fw={600}>{stats.activeListings}</Text>
                     </Group>
-                    <Progress value={(stats.activeListings / stats.totalListings) * 100} color="green" />
+                    <Progress value={stats.totalListings > 0 ? (stats.activeListings / stats.totalListings) * 100 : 0} color="cliquealow-green" />
                   </div>
                   
                   <div>
                     <Group gap="xs" mb="xs">
-                      <Badge color="blue" variant="light">Vendidos</Badge>
+                      <Badge color="cliquealow-green" variant="light">Vendidos</Badge>
                       <Text fw={600}>{stats.soldListings}</Text>
                     </Group>
-                    <Progress value={(stats.soldListings / stats.totalListings) * 100} color="blue" />
+                    <Progress value={stats.totalListings > 0 ? (stats.soldListings / stats.totalListings) * 100 : 0} color="cliquealow-green" />
                   </div>
                   
                   <div>
                     <Group gap="xs" mb="xs">
                       <Badge color="gray" variant="light">Inactivos</Badge>
-                      <Text fw={600}>{stats.totalListings - stats.activeListings - stats.soldListings}</Text>
+                      <Text fw={600}>{stats.inactiveListings}</Text>
                     </Group>
-                    <Progress value={((stats.totalListings - stats.activeListings - stats.soldListings) / stats.totalListings) * 100} color="gray" />
+                    <Progress value={stats.totalListings > 0 ? (stats.inactiveListings / stats.totalListings) * 100 : 0} color="gray" />
                   </div>
                 </SimpleGrid>
               </Stack>

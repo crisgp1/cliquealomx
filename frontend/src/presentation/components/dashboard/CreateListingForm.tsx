@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Button,
   TextInput,
@@ -11,23 +11,14 @@ import {
   Stack,
   Grid,
   Title,
-  Text,
   Card,
-  FileInput,
   MultiSelect,
-  Paper,
   Divider,
-  ActionIcon,
-  Image,
-  Flex,
   Switch,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import {
-  IconUpload,
-  IconX,
-  IconPhoto,
   IconCar,
   IconMapPin,
   IconPhone,
@@ -36,6 +27,9 @@ import {
   IconFileText,
   IconCheck,
 } from '@tabler/icons-react';
+import { ImageUploadSection } from './ImageUploadSection';
+import { ImageUploadUtil } from '@/lib/utils/imageUpload';
+import { useAuth } from '@clerk/nextjs';
 import { CreateListingData } from '@/lib/api/listings';
 import { useRouter } from 'next/navigation';
 import { useListingsApi } from '@/hooks/useListingsApi';
@@ -90,21 +84,12 @@ const commonFeatures = [
   'Tapicería de Piel', 'Quemacocos', 'Control de Crucero', 'Computadora de Viaje'
 ];
 
-const documentTypes = [
-  { value: 'factura', label: 'Factura Original' },
-  { value: 'tarjeta_circulacion', label: 'Tarjeta de Circulación' },
-  { value: 'verificacion', label: 'Verificación Vehicular' },
-  { value: 'tenencia', label: 'Tenencia' },
-  { value: 'seguro', label: 'Póliza de Seguro' },
-  { value: 'repuve', label: 'REPUVE' },
-  { value: 'otro', label: 'Otro' },
-];
 
 export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const router = useRouter();
   const listingsApi = useListingsApi();
+  const { getToken } = useAuth();
 
   const form = useForm({
     initialValues: {
@@ -149,15 +134,9 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
     },
   });
 
-  const handleImageUpload = (files: File[] | null) => {
-    if (files) {
-      setUploadedImages(prev => [...prev, ...files]);
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setUploadedImages(prev => prev.filter((_, i) => i !== index));
-  };
+  const handleImagesChanged = useCallback(() => {
+    // Images are managed internally by ImageUploadSection
+  }, []);
 
   const handleSubmit = async (values: typeof form.values) => {
     console.log('🚀 Form submit triggered!', values);
@@ -193,11 +172,11 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
       const newListing = await listingsApi.createListing(listingData);
       console.log('✅ API response:', newListing);
       
-      // Upload images if any
-      // TODO: Implement image upload functionality
-      if (uploadedImages.length > 0) {
-        console.log(`${uploadedImages.length} images ready to upload for listing ${newListing.id}`);
-        // Image upload will be implemented later
+      // Upload pending images if any
+      if (ImageUploadUtil.hasPendingImages()) {
+        console.log(`📸 Uploading ${ImageUploadUtil.getPendingImagesCount()} pending images...`);
+        const uploadedUrls = await ImageUploadUtil.uploadPendingImages(newListing.id, getToken);
+        console.log('✅ Images uploaded:', uploadedUrls);
       }
       
       notifications.show({
@@ -207,9 +186,9 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
         icon: <IconCheck size={16} />,
       });
       
-      // Reset form
+      // Reset form and clear any remaining pending images
       form.reset();
-      setUploadedImages([]);
+      ImageUploadUtil.clearPendingImages();
       
       if (onSuccess) {
         onSuccess();
@@ -387,58 +366,7 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
         </Card>
 
         {/* Images Upload */}
-        <Card withBorder>
-          <Stack gap="md">
-            <Group gap="xs">
-              <IconPhoto size={20} />
-              <Title order={3}>Fotografías</Title>
-            </Group>
-            
-            <Text size="sm" c="dimmed">
-              Sube fotos de alta calidad de tu auto. Las primeras imágenes aparecerán como principales.
-            </Text>
-            
-            <FileInput
-              label="Subir Imágenes"
-              description="Máximo 10 imágenes, formato JPG, PNG. Tamaño máximo 5MB por imagen."
-              placeholder="Seleccionar archivos..."
-              multiple
-              accept="image/png,image/jpeg,image/jpg"
-              leftSection={<IconUpload size={16} />}
-              onChange={handleImageUpload}
-            />
-            
-            {uploadedImages.length > 0 && (
-              <Grid>
-                {uploadedImages.map((file, index) => (
-                  <Grid.Col key={index} span={{ base: 6, sm: 4, md: 3 }}>
-                    <Paper p="xs" withBorder radius="md" pos="relative">
-                      <ActionIcon
-                        size="sm"
-                        color="red"
-                        variant="filled"
-                        style={{ position: 'absolute', top: 4, right: 4, zIndex: 1 }}
-                        onClick={() => removeImage(index)}
-                      >
-                        <IconX size={12} />
-                      </ActionIcon>
-                      <Image
-                        src={URL.createObjectURL(file)}
-                        alt={`Preview ${index + 1}`}
-                        height={100}
-                        radius="sm"
-                        fit="cover"
-                      />
-                      <Text size="xs" mt={4} truncate>
-                        {file.name}
-                      </Text>
-                    </Paper>
-                  </Grid.Col>
-                ))}
-              </Grid>
-            )}
-          </Stack>
-        </Card>
+        <ImageUploadSection onImagesChanged={handleImagesChanged} />
 
         {/* Location & Contact */}
         <Card withBorder>

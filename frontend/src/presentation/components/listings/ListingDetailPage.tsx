@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Title,
@@ -13,13 +13,13 @@ import {
   Card,
   Divider,
   Button,
-  Paper,
   List,
   Skeleton,
   Center,
   Alert,
   SimpleGrid,
 } from '@mantine/core';
+import { Carousel } from '@mantine/carousel';
 import {
   IconCar,
   IconMapPin,
@@ -32,10 +32,8 @@ import {
   IconManualGearbox,
   IconGauge,
   IconCalendar,
-  IconCurrencyDollar,
   IconAlertCircle,
 } from '@tabler/icons-react';
-import { notifications } from '@mantine/notifications';
 import { useListingsApi } from '@/hooks/useListingsApi';
 import { Listing } from '@/lib/api/listings';
 
@@ -49,11 +47,7 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
   const [error, setError] = useState<string | null>(null);
   const listingsApi = useListingsApi();
 
-  useEffect(() => {
-    loadListing();
-  }, [listingId]);
-
-  const loadListing = async () => {
+  const loadListing = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -65,7 +59,11 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [listingsApi, listingId]);
+
+  useEffect(() => {
+    loadListing();
+  }, [loadListing]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-MX', {
@@ -162,14 +160,75 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
         {/* Main Content */}
         <Grid.Col span={{ base: 12, md: 8 }}>
           <Stack gap="lg">
-            {/* Main Image */}
+            {/* Images Carousel */}
             <Card withBorder radius="md" p={0}>
-              <Image
-                src={listing.images?.[0] || '/api/placeholder/800/400'}
+              <Carousel
+                withIndicators
                 height={400}
-                alt={listing.title}
-                fallbackSrc="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0zNTAgMjAwSDQ1MFYxNTBIMzUwVjIwMFpNMzAwIDI1MEg0MDBWMJAWSDNJMFY1MEgiIGZpbGw9IiNEMEQwRDAiLz4KPC9zdmc+"
-              />
+                slideSize="100%"
+                emblaOptions={{ 
+                  loop: listing.images && listing.images.length > 1,
+                  align: 'center'
+                }}
+                previousControlProps={{ 'aria-label': 'Imagen anterior' }}
+                nextControlProps={{ 'aria-label': 'Siguiente imagen' }}
+                controlsOffset="xs"
+                controlSize={36}
+                styles={{
+                  control: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                    border: 'none',
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    },
+                  },
+                  indicator: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                    '&[data-active]': {
+                      backgroundColor: 'white',
+                    },
+                  },
+                  slide: {
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#f8f9fa',
+                  },
+                }}
+              >
+                {listing.images && listing.images.length > 0 ? (
+                  listing.images.map((image, index) => (
+                    <Carousel.Slide key={index}>
+                      <Image
+                        src={image}
+                        alt={`${listing.title} - Imagen ${index + 1}`}
+                        fallbackSrc="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0zNTAgMjAwSDQ1MFYxNTBIMzUwVjIwMFpNMzAwIDI1MEg0MDBWMJAWSDNJMEY1MEgiIGZpbGw9IiNEMEQwRDAiLz4KPC9zdmc+"
+                        fit="contain"
+                        style={{ 
+                          maxHeight: '100%',
+                          maxWidth: '100%',
+                          objectFit: 'contain'
+                        }}
+                      />
+                    </Carousel.Slide>
+                  ))
+                ) : (
+                  <Carousel.Slide>
+                    <Image
+                      src="/api/placeholder/800/400"
+                      alt={listing.title}
+                      fallbackSrc="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDgwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI4MDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0zNTAgMjAwSDQ1MFYxNTBIMzUwVjIwMFpNMzAwIDI1MEg0MDBWMJAWSDNJMEY1MEgiIGZpbGw9IiNEMEQwRDAiLz4KPC9zdmc+"
+                      fit="contain"
+                      style={{ 
+                        maxHeight: '100%',
+                        maxWidth: '100%',
+                        objectFit: 'contain'
+                      }}
+                    />
+                  </Carousel.Slide>
+                )}
+              </Carousel>
               <Group justify="space-between" p="md">
                 <Badge color={getStatusColor(listing.status)} size="lg">
                   {getStatusLabel(listing.status)}
@@ -218,7 +277,7 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
               <SimpleGrid cols={{ base: 2, sm: 3, md: 4 }} spacing="md">
                 {listing.mileage && (
                   <Group gap="xs">
-                    <IconGauge size={20} color="var(--mantine-color-blue-6)" />
+                    <IconGauge size={20} color="var(--mantine-color-cliquealow-green-6)" />
                     <div>
                       <Text size="sm" fw={500}>Kilometraje</Text>
                       <Text size="xs" c="dimmed">{listing.mileage.toLocaleString()} km</Text>
@@ -227,7 +286,7 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
                 )}
                 {listing.fuelType && (
                   <Group gap="xs">
-                    <IconGasStation size={20} color="var(--mantine-color-green-6)" />
+                    <IconGasStation size={20} color="var(--mantine-color-cliquealow-green-6)" />
                     <div>
                       <Text size="sm" fw={500}>Combustible</Text>
                       <Text size="xs" c="dimmed" tt="capitalize">{listing.fuelType}</Text>
@@ -236,7 +295,7 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
                 )}
                 {listing.transmission && (
                   <Group gap="xs">
-                    <IconManualGearbox size={20} color="var(--mantine-color-orange-6)" />
+                    <IconManualGearbox size={20} color="var(--mantine-color-cliquealow-green-6)" />
                     <div>
                       <Text size="sm" fw={500}>Transmisión</Text>
                       <Text size="xs" c="dimmed" tt="capitalize">{listing.transmission}</Text>
@@ -244,7 +303,7 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
                   </Group>
                 )}
                 <Group gap="xs">
-                  <IconCalendar size={20} color="var(--mantine-color-red-6)" />
+                  <IconCalendar size={20} color="var(--mantine-color-cliquealow-green-6)" />
                   <div>
                     <Text size="sm" fw={500}>Año</Text>
                     <Text size="xs" c="dimmed">{listing.year}</Text>
@@ -252,7 +311,7 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
                 </Group>
                 {listing.color && (
                   <Group gap="xs">
-                    <IconCar size={20} color="var(--mantine-color-purple-6)" />
+                    <IconCar size={20} color="var(--mantine-color-cliquealow-green-6)" />
                     <div>
                       <Text size="sm" fw={500}>Color</Text>
                       <Text size="xs" c="dimmed">{listing.color}</Text>
@@ -261,7 +320,7 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
                 )}
                 {listing.bodyType && (
                   <Group gap="xs">
-                    <IconCar size={20} color="var(--mantine-color-teal-6)" />
+                    <IconCar size={20} color="var(--mantine-color-cliquealow-green-6)" />
                     <div>
                       <Text size="sm" fw={500}>Tipo</Text>
                       <Text size="xs" c="dimmed" tt="capitalize">{listing.bodyType}</Text>
@@ -317,10 +376,10 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
                 <Stack gap="sm">
                   {listing.contactInfo.phone && (
                     <Group gap="sm">
-                      <IconPhone size={18} color="var(--mantine-color-blue-6)" />
+                      <IconPhone size={18} color="var(--mantine-color-cliquealow-green-6)" />
                       <div>
                         <Text size="sm" fw={500}>Teléfono</Text>
-                        <Text size="xs" c="blue" component="a" href={`tel:${listing.contactInfo.phone}`}>
+                        <Text size="xs" c="cliquealow-green" component="a" href={`tel:${listing.contactInfo.phone}`}>
                           {listing.contactInfo.phone}
                         </Text>
                       </div>
@@ -345,10 +404,10 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
                   )}
                   {listing.contactInfo.email && (
                     <Group gap="sm">
-                      <IconMail size={18} color="var(--mantine-color-orange-6)" />
+                      <IconMail size={18} color="var(--mantine-color-cliquealow-green-6)" />
                       <div>
                         <Text size="sm" fw={500}>Email</Text>
-                        <Text size="xs" c="blue" component="a" href={`mailto:${listing.contactInfo.email}`}>
+                        <Text size="xs" c="cliquealow-green" component="a" href={`mailto:${listing.contactInfo.email}`}>
                           {listing.contactInfo.email}
                         </Text>
                       </div>

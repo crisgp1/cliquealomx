@@ -8,6 +8,8 @@ import { AppService } from './app.service';
 
 // Feature modules
 import { ListingsModule } from './listings/listings.module';
+import { UploadModule } from './upload/upload.module';
+import { HeroContentModule } from './hero-content/hero-content.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { ListingsModule } from './listings/listings.module';
 
     // Feature modules
     ListingsModule,
+    UploadModule,
+    HeroContentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

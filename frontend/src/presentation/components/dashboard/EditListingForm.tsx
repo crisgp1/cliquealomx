@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Button,
   TextInput,
@@ -13,13 +13,8 @@ import {
   Title,
   Text,
   Card,
-  FileInput,
   MultiSelect,
-  Paper,
   Divider,
-  ActionIcon,
-  Image,
-  Flex,
   Switch,
   LoadingOverlay,
   Alert,
@@ -27,9 +22,6 @@ import {
 import { useForm } from '@mantine/form';
 import { notifications } from '@mantine/notifications';
 import {
-  IconUpload,
-  IconX,
-  IconPhoto,
   IconCar,
   IconMapPin,
   IconPhone,
@@ -39,6 +31,7 @@ import {
   IconCheck,
   IconAlertCircle,
 } from '@tabler/icons-react';
+import { ImageUploadSection } from './ImageUploadSection';
 import { useRouter } from 'next/navigation';
 import { useListingsApi } from '@/hooks/useListingsApi';
 import { Listing } from '@/lib/api/listings';
@@ -98,6 +91,7 @@ export function EditListingForm({ listingId }: EditListingFormProps) {
   const [loading, setLoading] = useState(true);
   const [listing, setListing] = useState<Listing | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [currentImages, setCurrentImages] = useState<string[]>([]);
   const router = useRouter();
   const listingsApi = useListingsApi();
 
@@ -137,12 +131,7 @@ export function EditListingForm({ listingId }: EditListingFormProps) {
     },
   });
 
-  // Cargar datos del listing existente
-  useEffect(() => {
-    loadListing();
-  }, [listingId]);
-
-  const loadListing = async () => {
+  const loadListing = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -152,6 +141,7 @@ export function EditListingForm({ listingId }: EditListingFormProps) {
       console.log('✅ Listing loaded:', data);
       
       setListing(data);
+      setCurrentImages(data.images || []);
       
       // Llenar el formulario con los datos existentes
       form.setValues({
@@ -188,7 +178,22 @@ export function EditListingForm({ listingId }: EditListingFormProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [listingId, listingsApi, form]);
+
+  // Cargar datos del listing existente
+  useEffect(() => {
+    loadListing();
+  }, [loadListing]);
+
+  // Image upload callbacks
+  const handleImagesUploaded = useCallback((urls: string[]) => {
+    console.log('📸 New images uploaded:', urls);
+    setCurrentImages(prev => [...prev, ...urls]);
+  }, []);
+
+  const handleImagesChanged = useCallback((images: string[]) => {
+    setCurrentImages(images);
+  }, []);
 
   const handleSubmit = async (values: typeof form.values) => {
     console.log('🚀 Form submit - updating listing:', listingId);
@@ -430,6 +435,14 @@ export function EditListingForm({ listingId }: EditListingFormProps) {
             />
           </Stack>
         </Card>
+
+        {/* Images Upload */}
+        <ImageUploadSection 
+          listingId={listingId}
+          existingImages={currentImages}
+          onImagesUploaded={handleImagesUploaded}
+          onImagesChanged={handleImagesChanged}
+        />
 
         {/* Location & Contact */}
         <Card withBorder>

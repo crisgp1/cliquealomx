@@ -1,12 +1,11 @@
 import { Box } from '@mantine/core';
-import { HeroSection, EmptyCatalog, Footer } from '@/presentation/components';
+import { HeroSection, ListingsCatalog } from '@/presentation/components';
 
 export default function Home() {
   return (
     <Box>
       <HeroSection />
-      <EmptyCatalog />
-      <Footer />
+      <ListingsCatalog />
     </Box>
   );
 }

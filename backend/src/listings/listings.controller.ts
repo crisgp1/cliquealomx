@@ -47,6 +47,13 @@ export class ListingsController {
     return this.listingsService.getStats('temp-user');
   }
 
+  @Get('analytics')
+  async getAnalytics(): Promise<any> {
+    console.log('📈 Fetching analytics data');
+    // For now, get analytics for temp user until auth is implemented
+    return this.listingsService.getAnalytics('temp-user');
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Listing | null> {
     console.log('🔍 Fetching listing by ID:', id);

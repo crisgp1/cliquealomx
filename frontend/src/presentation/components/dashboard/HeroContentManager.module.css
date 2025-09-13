@@ -1,0 +1,31 @@
+.item {
+  background: var(--mantine-color-body);
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+
+.itemDragging {
+  opacity: 0.5;
+  transform: rotate(5deg) !important;
+  box-shadow: var(--mantine-shadow-lg);
+  z-index: 1000;
+}
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mantine-color-gray-6);
+  cursor: grab;
+  padding: var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-sm);
+  transition: color 150ms ease;
+}
+
+.dragHandle:hover {
+  color: var(--mantine-color-gray-8);
+  background-color: var(--mantine-color-gray-1);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}

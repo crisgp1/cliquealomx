@@ -1,5 +1,61 @@
 @import "tailwindcss";
 
+/* Readex Pro Typography Classes */
+.readex-pro-light {
+  font-family: var(--font-readex-pro), sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.readex-pro-regular {
+  font-family: var(--font-readex-pro), sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.readex-pro-medium {
+  font-family: var(--font-readex-pro), sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.readex-pro-semibold {
+  font-family: var(--font-readex-pro), sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.readex-pro-bold {
+  font-family: var(--font-readex-pro), sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Roboto Typography Classes */
+.roboto-light {
+  font-family: var(--font-roboto), sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.roboto-regular {
+  font-family: var(--font-roboto), sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.roboto-medium {
+  font-family: var(--font-roboto), sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.roboto-bold {
+  font-family: var(--font-roboto), sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -22,5 +78,5 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-roboto), sans-serif;
 }

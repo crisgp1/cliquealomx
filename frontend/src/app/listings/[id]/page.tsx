@@ -1,19 +1,21 @@
 import { ListingDetailPage } from '@/presentation/components/listings/ListingDetailPage';
 
 interface ListingPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function ListingPage({ params }: ListingPageProps) {
-  return <ListingDetailPage listingId={params.id} />;
+export default async function ListingPage({ params }: ListingPageProps) {
+  const { id } = await params;
+  return <ListingDetailPage listingId={id} />;
 }
 
 export async function generateMetadata({ params }: ListingPageProps) {
+  const { id } = await params;
   // En producción, aquí harías una llamada para obtener el título del listing
   return {
-    title: `Anuncio de Auto - Cliquéalo.mx`,
-    description: 'Ve los detalles de este anuncio de auto usado',
+    title: `Anuncio ${id} - Cliquéalo.mx`,
+    description: `Ve los detalles del anuncio ${id} de auto usado`,
   };
 }

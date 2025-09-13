@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import {
   Anchor,
   Box,
@@ -16,11 +17,11 @@ const navigationLinks = [
   { label: 'Inicio', href: '/' },
   { label: 'Explorar Autos', href: '/explorar' },
   { label: 'Nosotros', href: '/nosotros' },
-  { label: 'Lounge Club ★', href: '/lounge' },
+  { label: 'Lounge Club ★', href: '/lounge-club' },
 ];
 
 const supportLinks = [
-  { label: 'Centro de Ayuda', href: '/ayuda' },
+  { label: 'Centro de Ayuda', href: '/soporte' },
   { label: 'Términos de Uso', href: '/terminos' },
   { label: 'Política de Privacidad', href: '/privacidad' },
   { label: 'Contacto', href: '/contacto' },
@@ -41,9 +42,13 @@ export function Footer() {
           {/* Brand Section */}
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Stack gap="md">
-              <Text size="xl" fw={700} c="blue.4">
-                Cliquéalo.mx
-              </Text>
+              <Image
+                src="/logo-blanco.svg"
+                alt="Cliquéalo.mx"
+                width={150}
+                height={35}
+                priority
+              />
               <Text size="sm" c="dimmed" pr={{ base: 0, md: 'lg' }}>
                 Tu plataforma confiable para encontrar el auto perfecto. 
                 Conectamos compradores y vendedores con la mejor experiencia del mercado.
@@ -71,7 +76,7 @@ export function Footer() {
                     styles={{
                       root: {
                         '&:hover': {
-                          color: 'var(--mantine-color-blue-4)',
+                          color: 'var(--mantine-color-cliquealow-green-4)',
                         },
                       },
                     }}
@@ -103,7 +108,7 @@ export function Footer() {
                     styles={{
                       root: {
                         '&:hover': {
-                          color: 'var(--mantine-color-blue-4)',
+                          color: 'var(--mantine-color-cliquealow-green-4)',
                         },
                       },
                     }}
@@ -124,7 +129,7 @@ export function Footer() {
           align="center"
           gap="md"
           style={{
-            flexDirection: { base: 'column', sm: 'row' } as any,
+            flexDirection: 'column',
           }}
         >
           <Group gap="xs" align="center">
@@ -143,7 +148,7 @@ export function Footer() {
             <Anchor
               href="https://hyrk.io"
               size="xs"
-              c="blue.4"
+              c="cliquealow-green.4"
               underline="never"
               fw={500}
               styles={{

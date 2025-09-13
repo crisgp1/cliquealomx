@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import Image from 'next/image';
 import {
   AppShell,
   Burger,
@@ -8,23 +8,16 @@ import {
   Text,
   NavLink,
   ScrollArea,
-  UnstyledButton,
   Avatar,
-  Menu,
-  rem,
   Stack,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
   IconCar,
   IconDashboard,
-  IconSettings,
-  IconLogout,
-  IconChevronDown,
   IconPlus,
-  IconList,
   IconAnalyze,
-  IconUsers,
+  IconPhoto,
 } from '@tabler/icons-react';
 import { SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
 
@@ -58,16 +51,10 @@ const navigationData = [
     description: 'Visualizaciones y reportes'
   },
   { 
-    icon: IconUsers, 
-    label: 'Mis Compradores', 
-    href: '/dashboard/buyers',
-    description: 'Gestiona tus contactos'
-  },
-  { 
-    icon: IconSettings, 
-    label: 'Configuración', 
-    href: '/dashboard/settings',
-    description: 'Ajustes de la cuenta'
+    icon: IconPhoto, 
+    label: 'Gestión de Hero', 
+    href: '/dashboard/hero-content',
+    description: 'Administra el contenido del hero'
   },
 ];
 
@@ -96,14 +83,13 @@ export function DashboardShell({ children }: DashboardShellProps) {
           
           <Group justify="space-between" style={{ flex: 1 }}>
             <Group>
-              <Text
-                size="xl"
-                fw={700}
-                c="blue"
-                style={{ cursor: 'pointer' }}
-              >
-                Cliquéalo.mx
-              </Text>
+              <Image
+                src="/logo.svg"
+                alt="Cliquéalo.mx"
+                width={120}
+                height={40}
+                priority
+              />
               <Text size="sm" c="dimmed">
                 Dashboard
               </Text>

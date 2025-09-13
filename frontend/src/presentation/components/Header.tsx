@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import Image from 'next/image';
 import {
   Box,
   Burger,
@@ -14,11 +14,10 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-  SignInButton,
-  SignUpButton,
   SignedIn,
   SignedOut,
   UserButton,
+  useClerk,
 } from '@clerk/nextjs';
 
 const navigationItems = [
@@ -30,6 +29,7 @@ const navigationItems = [
 
 export function Header() {
   const [opened, { toggle, close }] = useDisclosure();
+  const { openSignIn, openSignUp } = useClerk();
 
   return (
     <>
@@ -47,14 +47,19 @@ export function Header() {
         <Container size="xl" h="100%">
           <Group justify="space-between" h="100%">
             {/* Logo */}
-            <Text
-              size="xl"
-              fw={700}
-              c="blue"
+            <UnstyledButton
+              component="a"
+              href="/"
               style={{ cursor: 'pointer' }}
             >
-              Cliquéalo.mx
-            </Text>
+              <Image
+                src="/logo.svg"
+                alt="Cliquéalo.mx"
+                width={120}
+                height={40}
+                priority
+              />
+            </UnstyledButton>
 
             {/* Desktop Navigation */}
             <Group gap="md" visibleFrom="md">
@@ -83,16 +88,21 @@ export function Header() {
               {/* Auth Section */}
               <SignedOut>
                 <Group gap="xs">
-                  <SignInButton>
-                    <Button variant="light" size="sm">
-                      Iniciar Sesión
-                    </Button>
-                  </SignInButton>
-                  <SignUpButton>
-                    <Button size="sm">
-                      Registrarse
-                    </Button>
-                  </SignUpButton>
+                  <Button 
+                    variant="light" 
+                    size="sm" 
+                    color="cliquealow-green"
+                    onClick={() => openSignIn()}
+                  >
+                    Iniciar Sesión
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    color="cliquealow-green"
+                    onClick={() => openSignUp()}
+                  >
+                    Registrarse
+                  </Button>
                 </Group>
               </SignedOut>
               <SignedIn>
@@ -176,16 +186,27 @@ export function Header() {
           <Box pt="md" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
             <SignedOut>
               <Stack gap="sm">
-                <SignInButton>
-                  <Button variant="light" fullWidth onClick={close}>
-                    Iniciar Sesión
-                  </Button>
-                </SignInButton>
-                <SignUpButton>
-                  <Button fullWidth onClick={close}>
-                    Registrarse
-                  </Button>
-                </SignUpButton>
+                <Button 
+                  variant="light" 
+                  fullWidth 
+                  color="cliquealow-green"
+                  onClick={() => {
+                    openSignIn();
+                    close();
+                  }}
+                >
+                  Iniciar Sesión
+                </Button>
+                <Button 
+                  fullWidth 
+                  color="cliquealow-green"
+                  onClick={() => {
+                    openSignUp();
+                    close();
+                  }}
+                >
+                  Registrarse
+                </Button>
               </Stack>
             </SignedOut>
             <SignedIn>

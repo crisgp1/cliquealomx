@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Box,
   Container,
   Group,
   Paper,
@@ -18,7 +17,7 @@ export function EmptyCatalog() {
       <Stack gap="xl" align="center">
         <Title
           order={2}
-          size={{ base: 'h2', md: 'h1' }}
+          size="h2"
           ta="center"
           fw={600}
         >

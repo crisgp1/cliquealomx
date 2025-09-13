@@ -1,7 +1,7 @@
-import { User } from '../../domain/entities/user.entity';
+import { User, UserProps } from '../../domain/entities/user.entity';
 import { UserRepository, CreateUserRequest } from '../../domain/repositories/user.repository';
 
-interface ApiResponse<T> {
+interface ApiResponse<T = unknown> {
   success: boolean;
   data: T;
   message: string;
@@ -27,8 +27,8 @@ export class UserApiRepository implements UserRepository {
       throw new Error(`Failed to create user: ${response.statusText}`);
     }
 
-    const apiResponse: ApiResponse<any> = await response.json();
-    
+    const apiResponse: ApiResponse<UserProps> = await response.json();
+
     if (!apiResponse.success) {
       throw new Error(apiResponse.message);
     }
@@ -51,8 +51,8 @@ export class UserApiRepository implements UserRepository {
         throw new Error(`Failed to find user: ${response.statusText}`);
       }
 
-      const apiResponse: ApiResponse<any> = await response.json();
-      
+      const apiResponse: ApiResponse<UserProps> = await response.json();
+
       if (!apiResponse.success || !apiResponse.data) {
         return null;
       }
@@ -75,8 +75,8 @@ export class UserApiRepository implements UserRepository {
       throw new Error(`Failed to fetch users: ${response.statusText}`);
     }
 
-    const apiResponse: ApiResponse<any[]> = await response.json();
-    
+    const apiResponse: ApiResponse<UserProps[]> = await response.json();
+
     if (!apiResponse.success) {
       throw new Error(apiResponse.message);
     }

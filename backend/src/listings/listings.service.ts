@@ -158,6 +158,71 @@ export class ListingsService {
     };
   }
 
+  async getAnalytics(userId?: string): Promise<{
+    totalViews: number;
+    activeListings: number;
+    inquiries: number;
+    conversionRate: number;
+    popularListings: Array<{
+      id: string;
+      title: string;
+      views: number;
+    }>;
+    recentActivity: Array<{
+      type: string;
+      description: string;
+      timestamp: Date;
+      listingId?: string;
+    }>;
+  }> {
+    const matchQuery = userId ? { userId } : {};
+    
+    // Get basic stats
+    const basicStats = await this.getStats(userId);
+    
+    // Get popular listings (top 3 by views)
+    const popularListings = await this.listingModel
+      .find(matchQuery)
+      .sort({ viewsCount: -1 })
+      .limit(3)
+      .select('title viewsCount')
+      .exec();
+
+    // Get recent listings for activity feed
+    const recentListings = await this.listingModel
+      .find(matchQuery)
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .select('title createdAt')
+      .exec();
+
+    // Calculate conversion rate (simplified: likes / views)
+    const conversionRate = basicStats.views > 0 
+      ? (basicStats.likes / basicStats.views) * 100 
+      : 0;
+
+    // Real recent activity based on actual listings
+    const recentActivity = recentListings.map(listing => ({
+      type: 'listing',
+      description: 'Nuevo anuncio publicado',
+      timestamp: listing.createdAt,
+      listingId: (listing as any)._id.toString(),
+    }));
+
+    return {
+      totalViews: basicStats.views,
+      activeListings: basicStats.active,
+      inquiries: Math.floor(basicStats.views * 0.15), // Mock: 15% of views become inquiries
+      conversionRate: Number(conversionRate.toFixed(1)),
+      popularListings: popularListings.map(listing => ({
+        id: (listing as any)._id.toString(),
+        title: listing.title,
+        views: listing.viewsCount,
+      })),
+      recentActivity,
+    };
+  }
+
   async incrementView(id: string): Promise<{ viewsCount: number }> {
     const updated = await this.listingModel.findByIdAndUpdate(
       id,
@@ -177,5 +242,14 @@ export class ListingsService {
     await this.listingModel.findByIdAndUpdate(id, { likesCount: newCount });
     
     return { liked: true, likesCount: newCount };
+  }
+
+  async updateImages(id: string, imageUrls: string[]): Promise<Listing | null> {
+    console.log('🖼️ Updating listing images:', id, 'with', imageUrls.length, 'images');
+    return this.listingModel.findByIdAndUpdate(
+      id,
+      { images: imageUrls },
+      { new: true }
+    ).exec();
   }
 }

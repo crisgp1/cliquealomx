@@ -9,7 +9,9 @@ async function bootstrap() {
     origin: [
       'http://localhost:3000',
       'http://localhost:3001',
-      'https://cliquealomx.vercel.app'
+      'https://cliquealomx.vercel.app',
+      'https://cliquealo.mx',
+      'https://www.cliquealo.mx'
     ],
     credentials: true,
   });

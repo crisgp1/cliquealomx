@@ -18,6 +18,7 @@ import { Dropzone, IMAGE_MIME_TYPE, FileWithPath, FileRejection } from '@mantine
 import { IconUpload, IconX, IconPhoto, IconAlertCircle } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useAuth } from '@clerk/nextjs';
+import { SafeImage } from '../common/SafeImage';
 
 interface ImageUploadSectionProps {
   listingId?: string; // Solo para edición
@@ -304,12 +305,10 @@ export function ImageUploadSection({
           {/* Imágenes ya subidas */}
           {uploadedImages.map((url, index) => (
             <Paper key={`uploaded-${index}`} radius="md" withBorder p={0} style={{ position: 'relative' }}>
-              <Image
+              <SafeImage
                 src={url}
-                height={120}
                 alt={`Imagen ${index + 1}`}
-                radius="md"
-                fit="cover"
+                className="h-32 rounded-md"
               />
               
               {/* Badge de imagen principal */}

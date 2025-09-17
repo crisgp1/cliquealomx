@@ -88,18 +88,18 @@ export function Header() {
               {/* Auth Section */}
               <SignedOut>
                 <Group gap="xs">
-                  <Button 
-                    variant="light" 
-                    size="sm" 
+                  <Button
+                    variant="light"
+                    size="sm"
                     color="cliquealow-green"
-                    onClick={() => openSignIn()}
+                    onClick={() => openSignIn({})}
                   >
                     Iniciar Sesión
                   </Button>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     color="cliquealow-green"
-                    onClick={() => openSignUp()}
+                    onClick={() => openSignUp({})}
                   >
                     Registrarse
                   </Button>
@@ -186,22 +186,22 @@ export function Header() {
           <Box pt="md" style={{ borderTop: '1px solid var(--mantine-color-gray-3)' }}>
             <SignedOut>
               <Stack gap="sm">
-                <Button 
-                  variant="light" 
-                  fullWidth 
+                <Button
+                  variant="light"
+                  fullWidth
                   color="cliquealow-green"
                   onClick={() => {
-                    openSignIn();
+                    openSignIn({});
                     close();
                   }}
                 >
                   Iniciar Sesión
                 </Button>
-                <Button 
-                  fullWidth 
+                <Button
+                  fullWidth
                   color="cliquealow-green"
                   onClick={() => {
-                    openSignUp();
+                    openSignUp({});
                     close();
                   }}
                 >

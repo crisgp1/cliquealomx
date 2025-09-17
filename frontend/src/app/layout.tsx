@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from '@clerk/nextjs';
-import { Suspense } from 'react';
 import { Geist, Geist_Mono, Readex_Pro, Roboto } from "next/font/google";
 import { MantineProvider, ColorSchemeScript, createTheme } from '@mantine/core';
 import { Notifications } from '@mantine/notifications';
@@ -100,7 +99,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider dynamic>
+    <ClerkProvider
+      appearance={{
+        variables: {
+          colorPrimary: '#22c55e',
+          colorText: '#111827',
+        },
+      }}
+    >
       <html lang="es" suppressHydrationWarning>
         <head>
           <ColorSchemeScript />
@@ -110,9 +116,7 @@ export default function RootLayout({
         >
           <MantineProvider theme={theme}>
             <Notifications />
-            <Suspense fallback={<div style={{ height: '60px' }} />}>
-              <ConditionalHeader />
-            </Suspense>
+            <ConditionalHeader />
             {children}
             <ConditionalFooter />
           </MantineProvider>

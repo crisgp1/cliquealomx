@@ -29,7 +29,6 @@ import {
 } from '@tabler/icons-react';
 import { ImageUploadSection } from './ImageUploadSection';
 import { ImageUploadUtil } from '@/lib/utils/imageUpload';
-import { useAuth } from '@clerk/nextjs';
 import { CreateListingData } from '@/lib/api/listings';
 import { useRouter } from 'next/navigation';
 import { useListingsApi } from '@/hooks/useListingsApi';
@@ -89,7 +88,6 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
   const listingsApi = useListingsApi();
-  const { getToken } = useAuth();
 
   const form = useForm({
     initialValues: {
@@ -175,7 +173,7 @@ export function CreateListingForm({ onSuccess }: CreateListingFormProps) {
       // Upload pending images if any
       if (ImageUploadUtil.hasPendingImages()) {
         console.log(`📸 Uploading ${ImageUploadUtil.getPendingImagesCount()} pending images...`);
-        const uploadedUrls = await ImageUploadUtil.uploadPendingImages(newListing.id, getToken);
+        const uploadedUrls = await ImageUploadUtil.uploadPendingImages(newListing.id);
         console.log('✅ Images uploaded:', uploadedUrls);
       }
       

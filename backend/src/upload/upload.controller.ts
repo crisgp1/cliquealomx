@@ -1,6 +1,9 @@
 import {
   Controller,
   Post,
+  Get,
+  Param,
+  Res,
   UploadedFiles,
   UseInterceptors,
   Body,
@@ -8,6 +11,7 @@ import {
   HttpStatus,
   HttpCode,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { UploadService, UploadResult } from './upload.service';
 import { ListingsService } from '../listings/listings.service';
@@ -131,6 +135,49 @@ export class UploadController {
       throw new BadRequestException(
         error.message || 'Error al procesar los archivos multimedia'
       );
+    }
+  }
+
+  @Get('proxy/:folder/:subfolder/:filename')
+  async proxyImage(
+    @Param('folder') folder: string,
+    @Param('subfolder') subfolder: string,
+    @Param('filename') filename: string,
+    @Res() res: Response,
+  ) {
+    try {
+      const imageUrl = `https://cliquealo-blob.sfo3.digitaloceanspaces.com/${folder}/${subfolder}/${filename}`;
+
+      console.log('🖼️ Proxying image:', imageUrl);
+
+      // Fetch the image from DigitalOcean Spaces
+      const response = await fetch(imageUrl);
+
+      if (!response.ok) {
+        console.error(`❌ Image not found: ${imageUrl} (Status: ${response.status})`);
+        return res.status(404).json({ error: 'Image not found' });
+      }
+
+      // Set CORS headers
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+      // Set content type
+      const contentType = response.headers.get('content-type') || 'image/jpeg';
+      res.setHeader('Content-Type', contentType);
+
+      // Set cache headers
+      res.setHeader('Cache-Control', 'public, max-age=31536000'); // 1 year
+
+      // Stream the image
+      const buffer = await response.arrayBuffer();
+      res.send(Buffer.from(buffer));
+
+      console.log('✅ Image proxied successfully');
+    } catch (error) {
+      console.error('❌ Error proxying image:', error);
+      res.status(500).json({ error: 'Failed to fetch image' });
     }
   }
 }

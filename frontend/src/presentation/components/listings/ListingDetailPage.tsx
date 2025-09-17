@@ -183,11 +183,14 @@ export function ListingDetailPage({ listingId }: ListingDetailPageProps) {
                       backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     },
                   },
+                  indicators: {
+                    bottom: '1rem',
+                  },
                   indicator: {
+                    width: '0.75rem',
+                    height: '0.75rem',
+                    transition: 'width 250ms ease, background-color 250ms ease',
                     backgroundColor: 'rgba(255, 255, 255, 0.6)',
-                    '&[data-active]': {
-                      backgroundColor: 'white',
-                    },
                   },
                   slide: {
                     display: 'flex',

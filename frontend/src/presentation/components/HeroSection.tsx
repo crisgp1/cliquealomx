@@ -16,12 +16,7 @@ export function HeroSection() {
   const [vehicleImages, setVehicleImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
-  const [dynamicTexts, setDynamicTexts] = useState([
-    {
-      title: "Autos seminuevos, precios justos.",
-      description: "Compra y vende autos seminuevos de manera simple, transparente y sin complicaciones."
-    }
-  ]);
+  const [dynamicTexts, setDynamicTexts] = useState<Array<{title: string, description: string}>>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,12 +48,19 @@ export function HeroSection() {
         // Process hero content
         if (heroResponse.ok) {
           const heroContents = await heroResponse.json();
-          if (heroContents.length > 0) {
+          if (heroContents && heroContents.length > 0) {
             setDynamicTexts(heroContents.map((content: { title: string; description: string }) => ({
               title: content.title,
               description: content.description
             })));
+          } else {
+            // Si no hay contenido en el backend, no usar fallback hardcodeado
+            console.log('No hero content found in backend');
+            setDynamicTexts([]);
           }
+        } else {
+          console.log('Failed to fetch hero content');
+          setDynamicTexts([]);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -85,8 +87,10 @@ export function HeroSection() {
   }, [vehicleImages]);
 
   useEffect(() => {
+    if (dynamicTexts.length === 0) return;
+
     const textInterval = setInterval(() => {
-      setCurrentTextIndex((prevIndex) => 
+      setCurrentTextIndex((prevIndex) =>
         (prevIndex + 1) % dynamicTexts.length
       );
     }, 5000); // Cambiar texto cada 5 segundos
@@ -225,7 +229,7 @@ export function HeroSection() {
                       }}
                       className="readex-pro-semibold"
                     >
-                      {dynamicTexts[currentTextIndex].title}
+                      {dynamicTexts.length > 0 ? dynamicTexts[currentTextIndex].title : 'Cargando...'}
                     </Text>
                   </motion.div>
                 </AnimatePresence>
@@ -274,7 +278,7 @@ export function HeroSection() {
                       }}
                       className="roboto-regular"
                     >
-                      {dynamicTexts[currentTextIndex].description}
+                      {dynamicTexts.length > 0 ? dynamicTexts[currentTextIndex].description : ''}
                     </Text>
                   </motion.div>
                 </AnimatePresence>

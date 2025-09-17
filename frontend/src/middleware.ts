@@ -10,8 +10,10 @@ const isProtectedRoute = createRouteMatcher([
 export default clerkMiddleware(async (auth, req) => {
   // Si es una ruta protegida y el usuario no está autenticado, redirigir a sign-in
   if (isProtectedRoute(req) && !(await auth()).userId) {
-    const { redirectToSignIn } = await auth()
-    return redirectToSignIn()
+    // Redirigir a la página local de sign-in, no al subdominio de Clerk
+    const signInUrl = new URL('/sign-in', req.url)
+    signInUrl.searchParams.set('redirect_url', req.url)
+    return Response.redirect(signInUrl)
   }
 })
 

@@ -106,6 +106,12 @@ export default function RootLayout({
           colorText: '#111827',
         },
       }}
+      signInUrl="/auth-sign-in"
+      signUpUrl="/auth-sign-up"
+      afterSignInUrl="/"
+      afterSignUpUrl="/"
+      signInFallbackRedirectUrl="/"
+      signUpFallbackRedirectUrl="/"
     >
       <html lang="es" suppressHydrationWarning>
         <head>
